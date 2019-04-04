@@ -5,6 +5,21 @@
 
 // Note: This sketch is a WORK IN PROGRESS
 
+/*
+ * Required:
+ * Library for Bluetooth: https://github.com/adafruit/Adafruit_nRF8001/archive/master.zip
+ * ^Place in Libraries folder for Arduino IDE
+ * Page for Bluetooth: https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/software
+ * 
+ * Libraries for IMU
+ * Adafruit_FXOS8700
+ * Adafruit_FXAS21002C
+ * Adafruit Unified Sensor (Adafruit_Sensor)
+ * Adafruit_AHRS
+ * Page for IMU:https://www.adafruit.com/product/3463
+ * 
+ */
+
 #define ST_LSM303DLHC_L3GD20        (0)
 #define ST_LSM9DS1                  (1)
 #define NXP_FXOS8700_FXAS21002      (2)
