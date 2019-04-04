@@ -277,26 +277,32 @@ void loop(void)
   float pitch = filter.getPitch();
   float heading = filter.getYaw();
   String completeString; 
- /* Serial.print(millis());
-  Serial.print(" - Orientation: ");
+  Serial.print(millis());
+  //Serial.print(" - Orientation: ");
+  Serial.print(",");
   Serial.print(heading);
-  Serial.print(" ");
+  Serial.print(",");
   Serial.print(pitch);
-  Serial.print(" ");
+  Serial.print(",");
   Serial.print(roll);
   //this is my comment
-  Serial.print("| A ");
-  Serial.print("X: "); Serial.print(accel_event.acceleration.x, 4); Serial.print("  ");
-  Serial.print("Y: "); Serial.print(accel_event.acceleration.y, 4); Serial.print("  ");
-  Serial.print("Z: "); Serial.print(accel_event.acceleration.z, 4); Serial.print("  ");
-  Serial.println("m/s^2");
-*/
+  //Serial.print("| A ");
+  //Serial.print("X: "); 
+  Serial.print(",");
+  Serial.print(accel_event.acceleration.x, 4); Serial.print(",");
+  //Serial.print("Y: "); 
+  Serial.print(accel_event.acceleration.y, 4); Serial.print(",");
+  //Serial.print("Z: "); 
+  Serial.print(accel_event.acceleration.z, 4); Serial.print("\n");
+  //Serial.println("m/s^2");
+
+/*
   completeString = "test string";
   Serial.println(completeString);
 
   if(ble.isConnected()){ //make sure the user is still connected
     ble.writeBLEUart("BLE: test string\n");
   }
-  
+  */
   delay(150);
 }
