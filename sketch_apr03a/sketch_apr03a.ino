@@ -9,7 +9,7 @@
  * Required:
  * Library for Bluetooth: https://github.com/adafruit/Adafruit_nRF8001/archive/master.zip
  * ^Place in Libraries folder for Arduino IDE
- * Page for Bluetooth: https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/software
+ * Page for Bluetooth: https://www.adafruit.com/product/2633
  * 
  * Libraries for IMU
  * Adafruit_FXOS8700
