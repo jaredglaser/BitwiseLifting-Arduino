@@ -2,12 +2,22 @@
 #include <Adafruit_Sensor.h>
 #include <Mahony.h>
 #include <Madgwick.h>
+#include <Arduino.h>
+#include <SPI.h>
+#include "Adafruit_BLE.h"
+#include "Adafruit_BluefruitLE_SPI.h"
+#include "Adafruit_BluefruitLE_UART.h"
+#if SOFTWARE_SERIAL_AVAILABLE
+  #include <SoftwareSerial.h>
+#endif
+
+#include "BluefruitConfig.h"
 
 // Note: This sketch is a WORK IN PROGRESS
 
 /*
  * Required:
- * Library for Bluetooth: https://github.com/adafruit/Adafruit_nRF8001/archive/master.zip
+ * Library for Bluetooth: https://github.com/adafruit/Adafruit_BluefruitLE_nRF51/archive/master.zip
  * ^Place in Libraries folder for Arduino IDE
  * Page for Bluetooth: https://www.adafruit.com/product/2633
  * 
@@ -18,8 +28,23 @@
  * Adafruit_AHRS
  * Page for IMU:https://www.adafruit.com/product/3463
  * 
+ * Pin info for Bluetooth:
+#define BLUEFRUIT_SPI_CS               10
+#define BLUEFRUIT_SPI_IRQ              2
+#define BLUEFRUIT_SPI_RST              -1    // Optional but recommended, set to -1 if unused
+#define BLUEFRUIT_SPI_SCK              13
+#define BLUEFRUIT_SPI_MISO             12
+#define BLUEFRUIT_SPI_MOSI             11
+ 
  */
 
+
+
+/*
+ * -----------------------
+ * IMU
+ * -----------------------
+ */
 #define ST_LSM303DLHC_L3GD20        (0)
 #define ST_LSM9DS1                  (1)
 #define NXP_FXOS8700_FXAS21002      (2)
@@ -76,6 +101,38 @@ float gyro_zero_offsets[3]      = { 0.0F, 0.0F, 0.0F };
 Mahony filter;
 //Madgwick filter;
 
+/*
+ * -----------------------
+ * BLUETOOTH
+ * -----------------------
+ */
+ 
+ #define FACTORYRESET_ENABLE      1
+// Create the bluefruit object, either software serial...uncomment these lines
+
+/* ...or hardware serial, which does not need the RTS/CTS pins. Uncomment this line */
+// Adafruit_BluefruitLE_UART ble(BLUEFRUIT_HWSERIAL_NAME, BLUEFRUIT_UART_MODE_PIN);
+
+/* ...hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST */
+Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
+
+/* ...software SPI, using SCK/MOSI/MISO user-defined SPI pins and then user selected CS/IRQ/RST */
+//Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_SCK, BLUEFRUIT_SPI_MISO,
+//                             BLUEFRUIT_SPI_MOSI, BLUEFRUIT_SPI_CS,
+//                             BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
+
+// String to send in the throughput test
+#define TEST_STRING     "01234567899876543210"
+
+// Number of total data sent ( 1024 times the test string)
+#define TOTAL_BYTES     (1024 * strlen(TEST_STRING))
+
+// A small helper
+void error(const __FlashStringHelper*err) {
+  Serial.println(err);
+  while (1);
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -118,6 +175,55 @@ void setup()
   // Filter expects 70 samples per second
   // Based on a Bluefruit M0 Feather ... rate should be adjuted for other MCUs
   filter.begin(10);
+
+  //-----------------------
+  //Connect to Bluetooth
+  //-----------------------
+
+  /* Initialise the module */
+  Serial.print(F("Initialising the Bluefruit LE module: "));
+
+  if ( !ble.begin(VERBOSE_MODE) )
+  {
+    error(F("Couldn't find Bluefruit, make sure it's in CoMmanD mode & check wiring?"));
+  }
+  Serial.println( F("OK!") );
+
+  if ( FACTORYRESET_ENABLE )
+  {
+    /* Perform a factory reset to make sure everything is in a known state */
+    Serial.println(F("Performing a factory reset: "));
+    if ( ! ble.factoryReset() ){
+      error(F("Couldn't factory reset"));
+    }
+  }
+
+  /* Disable command echo from Bluefruit */
+  ble.echo(false);
+
+  Serial.println("Requesting Bluefruit info:");
+  /* Print Bluefruit information */
+  ble.info();
+
+  /* Switch to DATA mode to have a better throughput */
+  Serial.println("Switch to DATA mode to have a better throughput ...");
+
+  /* Wait for a connection before starting the test */
+  Serial.println("Waiting for a BLE connection to continue ...");
+  ble.setMode(BLUEFRUIT_MODE_DATA);
+
+  ble.verbose(false);  // debug info is a little annoying after this point!
+
+  // Wait for connection to finish
+  while (! ble.isConnected()) {
+      delay(5000);
+  }
+
+  // Wait for the connection to complete
+  delay(1000);
+
+  Serial.println(F("CONNECTED!"));
+  Serial.println(F("**********"));
 }
 
 void loop(void)
@@ -170,7 +276,8 @@ void loop(void)
   float roll = filter.getRoll();
   float pitch = filter.getPitch();
   float heading = filter.getYaw();
-  Serial.print(millis());
+  String completeString; 
+ /* Serial.print(millis());
   Serial.print(" - Orientation: ");
   Serial.print(heading);
   Serial.print(" ");
@@ -183,6 +290,13 @@ void loop(void)
   Serial.print("Y: "); Serial.print(accel_event.acceleration.y, 4); Serial.print("  ");
   Serial.print("Z: "); Serial.print(accel_event.acceleration.z, 4); Serial.print("  ");
   Serial.println("m/s^2");
+*/
+  completeString = "test string";
+  Serial.println(completeString);
 
+  if(ble.isConnected()){ //make sure the user is still connected
+    ble.writeBLEUart("BLE: test string\n");
+  }
+  
   delay(150);
 }
