@@ -277,32 +277,45 @@ void loop(void)
   float pitch = filter.getPitch();
   float heading = filter.getYaw();
   String completeString; 
-  Serial.print(millis());
-  //Serial.print(" - Orientation: ");
-  Serial.print(",");
-  Serial.print(heading);
-  Serial.print(",");
-  Serial.print(pitch);
-  Serial.print(",");
-  Serial.print(roll);
-  //this is my comment
-  //Serial.print("| A ");
-  //Serial.print("X: "); 
-  Serial.print(",");
-  Serial.print(accel_event.acceleration.x, 4); Serial.print(",");
-  //Serial.print("Y: "); 
-  Serial.print(accel_event.acceleration.y, 4); Serial.print(",");
-  //Serial.print("Z: "); 
-  Serial.print(accel_event.acceleration.z, 4); Serial.print("\n");
-  //Serial.println("m/s^2");
+  String mill = String(millis());
+ 
+  String subaccel;
+  subaccel = String(accel_event.acceleration.y ,4);
+  String rollround;
+  rollround = String(roll);
+  String toSend;
+  String comma = ",";
+  String newline = "\n";
+  toSend = (millis() + comma + rollround.substring(0,4) + comma + subaccel.substring(0,6) + newline);
 
-/*
-  completeString = "test string";
-  Serial.println(completeString);
-
-  if(ble.isConnected()){ //make sure the user is still connected
-    ble.writeBLEUart("BLE: test string\n");
+  int numZeros = 19-toSend.length();
+  for(int i = 0; i<numZeros; i++){
+    toSend = "0" + toSend;
   }
-  */
-  delay(150);
+
+  
+  //Serial.println(toSend);
+  char charBuf[toSend.length()];
+  toSend.toCharArray(charBuf, toSend.length());
+ /* String bluetoothbuilder = "abcdefghijklmnopqrstuvwxyz";
+//  we now need to break it up into 20 byte segments
+  char charBuf[mill.length()];
+  mill.toCharArray(charBuf, mill.length());
+   */
+      if(ble.isConnected()){ //make sure the user is still connected\
+
+        
+        ble.writeBLEUart(charBuf);
+        //Serial.print(charBuf);
+        //Serial.println();
+        
+      }
+      else{
+        Serial.println("ERROR");
+      }
+    
+ 
+  
+  
+  delay(200);
 }
